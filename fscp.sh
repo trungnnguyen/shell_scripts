@@ -10,6 +10,7 @@ clear
 bool_file_exists=0
 profile_file_name='.fscp_profile'
 number_of_stored_servers=0
+pad=$(printf '%0.1s' "-"{1..60})
 
 ########################################################################
 #
@@ -17,17 +18,22 @@ number_of_stored_servers=0
 #
 
 # Showing the starting page info
-main_menu () {
+greatings () {
   echo
   echo 'FSCP -- Fast SCP'
   echo 'Version 1.0'
   echo 'By: Mojtaba Komeili'
+  echo
+}
+
+main_menu () {
   echo
   echo 'Select your actions:'
   echo '(s) connect to server (ssh)'
   echo '(c) copy file to server (scp)'
   echo '(l) list current serveres'
   echo '(a) add a new server'
+  echo '(q) quit'
 }
 
 # Getting number of previously stored servers
@@ -39,9 +45,13 @@ count_number_of_servers () {
 # Reading list of servers
 read_user_file () {
   server_counter=1
+  echo 'List of servers in your profile'
+  printf 'ID \t Name \t\t\t\t Address\n'
+  printf '%.1s' "-"{1..100}
+  echo
   while IFS=';' read -r f1 f2
   do
-    printf 'Server #%d: %s \t\t Address: %s\n' "$server_counter" "$f1" "$f2"
+    printf '%d \t %-30s %s\n' "$server_counter" "$f1" "$f2"
     server_counter=$((server_counter+1))
   done <"$profile_file_name"
 }
@@ -50,10 +60,10 @@ read_user_file () {
 load_user_profile () {
   if [ -e "$profile_file_name" ]
   then
+    echo 'Loading list of previously used serveres'
     bool_file_exists=1
     count_number_of_servers
     read_user_file
-    echo 'FSCP loaded the list of previously used serveres'
   else
     touch $profile_file_name
     echo 'A new fscp_profile file was created.'
@@ -70,7 +80,10 @@ prompt_user_for_selection() {
 #
 # Main function body
 #
+greatings
+load_user_profile
 main_menu
+#ans=prompt_user_for_selection
 
 
 
