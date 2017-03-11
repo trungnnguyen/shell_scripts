@@ -16,25 +16,10 @@ pad=$(printf '%0.1s' "-"{1..60})
 #
 # Main function body
 #
+########################################################################
 
-# Showing the starting page info
-greatings () {
-  echo
-  echo 'FSCP -- Fast SCP'
-  echo 'Version 1.0'
-  echo 'By: Mojtaba Komeili'
-  echo
-}
-
-main_menu () {
-  echo
-  echo 'Select your actions:'
-  echo '(s) connect to server (ssh)'
-  echo '(c) copy file to server (scp)'
-  echo '(l) list current serveres'
-  echo '(a) add a new server'
-  echo '(q) quit'
-}
+########################################################################
+# Loading user profile and info
 
 # Getting number of previously stored servers
 count_number_of_servers () {
@@ -70,20 +55,62 @@ load_user_profile () {
   fi
 }
 
-# prompt user for selection
-prompt_user_for_selection() {
-  read -p 'Please insert your selection: ' user_input
-  return $user_input
+########################################################################
+# Handling the main menu
+
+# Showing the starting page info
+greatings () {
+  echo
+  echo 'FSCP -- Fast SCP'
+  echo 'Version 1.0'
+  echo 'By: Mojtaba Komeili'
+  echo
 }
+
+# Options that are given to user on the main menu
+main_menu () {
+  echo
+  echo '(c) connect to server'
+  echo '(a) add a new server'
+  echo '(r) remove server'
+  echo '(q) quit'
+}
+
+# A listener to get user response on the main menu
+main_menu_respond () {
+  read -n 1 -p 'Insert your selection: ' user_input
+  echo
+  if [[ $user_input == 'c' || $user_input == 'C' ]]; then
+    echo "You are about to connect"
+  elif [[ $user_input == 'a' || $user_input == 'A' ]]; then
+    echo "Adding a new server"
+  elif [[ $user_input == 'r' || $user_input == 'R' ]]; then
+    echo "Removing a server"
+  elif [[ $user_input == 'q' || $user_input == 'Q' ]]; then
+    exit 0
+  else
+    echo "Invalid, try again."
+    main_menu_respond
+  fi
+}
+
+########################################################################
+# Connecting and copying files
+
+
+########################################################################
+# Add and remvoe servers
 
 ########################################################################
 #
 # Main function body
 #
+user_input = " "
 greatings
 load_user_profile
 main_menu
-#ans=prompt_user_for_selection
+main_menu_respond
+
 
 
 
