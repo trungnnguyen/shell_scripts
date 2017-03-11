@@ -17,12 +17,17 @@ number_of_stored_servers=0
 #
 
 # Showing the starting page info
-greatings () {
+main_menu () {
   echo
   echo 'FSCP -- Fast SCP'
   echo 'Version 1.0'
   echo 'By: Mojtaba Komeili'
   echo
+  echo 'Select your actions:'
+  echo '(s) connect to server (ssh)'
+  echo '(c) copy file to server (scp)'
+  echo '(l) list current serveres'
+  echo '(a) add a new server'
 }
 
 # Getting number of previously stored servers
@@ -47,20 +52,26 @@ load_user_profile () {
   then
     bool_file_exists=1
     count_number_of_servers
-    echo 'FSCP loaded the list of previously used serveres'
     read_user_file
+    echo 'FSCP loaded the list of previously used serveres'
   else
     touch $profile_file_name
     echo 'A new fscp_profile file was created.'
   fi
 }
 
+# prompt user for selection
+prompt_user_for_selection() {
+  read -p 'Please insert your selection: ' user_input
+  return $user_input
+}
+
 ########################################################################
 #
 # Main function body
 #
-greatings
-load_user_profile
+main_menu
+
 
 
 
