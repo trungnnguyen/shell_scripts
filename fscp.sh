@@ -93,6 +93,7 @@ main_menu () {
   fi
   echo '(a) add a new server'
   echo '(q) quit'
+  main_menu_respond
 }
 
 # A listener to get user response on the main menu
@@ -115,52 +116,96 @@ main_menu_respond () {
 
 ########################################################################
 # Connecting and copying files
-# Four variables are used here "connection_ID", "connection_type"
+# Four variables are used here "CONNECTION_ID", "connection_type"
 # "connection_copy_from", and "connection_copy_to"
 
 connect_select_server () {
   read -p 'Insert the server ID# (above list), or (R)eturn: ' user_input
   if [[ $user_input == 'r' || $user_input == 'R' ]]; then
     main_menu
-    main_menu_respond
   elif [[ $user_input < $((number_of_stored_servers+1))  && $user_input > 0  ]]; then
-    connection_ID=$user_input
-    connect_select_connection
+    CONNECTION_ID=$user_input
+    connect_select_connection_type
   else
     echo 'Invalid, try again.'
     connect_select_server
   fi
 }
 
-connect_select_connection () {
+connect_select_connection_type () {
   read -p 'Select connction type. (S)sh or s(C)p, or (R)eturn: ' user_input
   if [[ $user_input == 'r' || $user_input == 'R' ]]; then
     main_menu
-    main_menu_respond
   elif [[ $user_input == 's' || $user_input == 'S'  ]]; then
     connect_ssh
   elif [[ $user_input == 'c' || $user_input == 'C'  ]]; then
     connect_scp_from
   else
     echo 'Invalid, try again.'
-    connect_select_server
+    connect_select_connection_type
   fi
 }
 
 connect_scp_from () {
-  echo "From"
+  read -p 'Enter the source file/folder, or (R)eturn: ' user_input
+  if [[ $user_input == 'r' || $user_input == 'R' ]]; then
+    main_menu
+  else
+    CONNECTION_SCP_FROM=$user_input
+    connect_scp_to
+  fi
 }
 
 connect_scp_to () {
-  echo "To"
+  read -p 'Enter the destination, or (R)eturn: ' user_input
+  if [[ $user_input == 'r' || $user_input == 'R' ]]; then
+    main_menu
+  else
+    CONNECTION_SCP_TO=$user_input
+    connect_scp_direction
+  fi
+}
+
+connect_scp_direction () {
+  read -p 'Specify copy direction. (L)ocal to server, (S)erver to local, or (R)eturn: ' user_input
+  if [[ $user_input == 'r' || $user_input == 'R' ]]; then
+    main_menu
+  elif [[ $user_input == 'l' || $user_input == 'L'  ]]; then
+    SCP_DIRECTION=1
+    connect_scp
+  elif [[ $user_input == 's' || $user_input == 'S'  ]]; then
+    SCP_DIRECTION=2
+    connect_scp
+  else
+    echo 'Invalid, try again.'
+    connect_select_connection_type
+  fi
 }
 
 connect_ssh () {
   printf 'Establishing secure shell connection ... '
-  i=$((connection_ID-1))
+  i=$((CONNECTION_ID-1))
   CONNECTION_ARGUMENT=$(printf '%s@%s' "${server_list_usrnm[i]}" "${server_list_addrs[i]}")
   printf 'Connecting to %s \n' "$CONNECTION_ARGUMENT"
   ssh $CONNECTION_ARGUMENT
+}
+
+connect_scp () {
+  echo 'Copying files'
+  i=$((CONNECTION_ID-1))
+  SCP_SERVER=$(printf '%s@%s' "${server_list_usrnm[i]}" "${server_list_addrs[i]}")
+  if [[ $SCP_DIRECTION == 1 ]]; then # from local to server
+    SCP_ARGUMENT=$(printf '%sr %s %s:%s' "-" "$CONNECTION_SCP_FROM" "$SCP_SERVER" "$CONNECTION_SCP_TO")
+  elif [[ $SCP_DIRECTION == 2 ]]; then # from server to local
+    SCP_ARGUMENT=$(printf '%sr %s:%s %s' "-" "$SCP_SERVER" "$CONNECTION_SCP_FROM" "$CONNECTION_SCP_TO")
+  else
+    echo 'Incorrect direction of copying file'
+    echo 'Returning to the main menu.\n'
+    main_menu
+  fi
+
+  echo $SCP_ARGUMENT
+  scp $SCP_ARGUMENT
 }
 
 ########################################################################
@@ -174,19 +219,5 @@ greatings
 load_user_profile
 print_servers_list
 main_menu
-main_menu_respond
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # End of the script file
