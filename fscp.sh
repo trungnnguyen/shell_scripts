@@ -103,7 +103,7 @@ main_menu_respond () {
   if [[ $user_input == 'c' || $user_input == 'C' ]]; then
     connect_select_server
   elif [[ $user_input == 'a' || $user_input == 'A' ]]; then
-    echo 'Adding a new server'
+    add_new_server
   elif [[ $user_input == 'r' || $user_input == 'R' ]]; then
     echo 'Removing a server'
   elif [[ $user_input == 'q' || $user_input == 'Q' ]]; then
@@ -204,12 +204,58 @@ connect_scp () {
     main_menu
   fi
 
-  echo $SCP_ARGUMENT
   scp $SCP_ARGUMENT
 }
 
 ########################################################################
 # Add and remvoe servers
+add_new_server () {
+  local MAX_SERVER_COUNT=9
+  if [[ number_of_stored_servers == MAX_SERVER_COUNT ]]; then
+    printf 'Maximum number of servers can be stored is %d.' MAX_SERVER_COUNT
+    echo 'Can'' add a new server. Remove some servers to make more room.'
+    main_menu
+  else
+    add_new_server_name
+  fi
+}
+
+add_new_server_name () {
+  read -p 'Enter the name for new server, or (R)eturn ... ' user_input
+  if [[ $user_input == 'r' || $user_input == 'R' ]]; then
+    main_menu
+  else
+    NEW_SERVER_NAME=$user_input
+    add_new_server_address
+  fi
+}
+
+add_new_server_address () {
+  read -p 'Enter the address for new server, or (R)eturn ... ' user_input
+  if [[ $user_input == 'r' || $user_input == 'R' ]]; then
+    main_menu
+  else
+    NEW_SERVER_ADDRESS=$user_input
+    add_new_server_user_name
+  fi
+}
+
+add_new_server_user_name () {
+  read -p 'Enter your user name for new server, or (R)eturn ... ' user_input
+  if [[ $user_input == 'r' || $user_input == 'R' ]]; then
+    main_menu
+  else
+    NEW_SERVER_USER_NAME=$user_input
+    add_new_server_to_profile
+  fi
+}
+
+add_new_server_to_profile () {
+  echo 'Adding new server to the user profile.'
+  printf '%s;%s;%s\n' "$NEW_SERVER_NAME" \
+  "$NEW_SERVER_ADDRESS" "$NEW_SERVER_USER_NAME" >> $profile_file_name
+  main_menu
+}
 
 ########################################################################
 #
