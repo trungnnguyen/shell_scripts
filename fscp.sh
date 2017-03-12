@@ -90,6 +90,7 @@ main_menu () {
   if [[ $number_of_stored_servers > 0 ]]; then
     echo '(c) connect to server'
     echo '(r) remove server'
+    echo '(l) list servers'
   fi
   echo '(a) add a new server'
   echo '(q) quit'
@@ -104,8 +105,11 @@ main_menu_respond () {
     connect_select_server
   elif [[ $user_input == 'a' || $user_input == 'A' ]]; then
     add_new_server
+  elif [[ $user_input == 'l' || $user_input == 'L' ]]; then
+    print_servers_list
+    main_menu
   elif [[ $user_input == 'r' || $user_input == 'R' ]]; then
-    echo 'Removing a server'
+    remove_servers
   elif [[ $user_input == 'q' || $user_input == 'Q' ]]; then
     exit 0
   else
@@ -226,6 +230,7 @@ add_new_server_name () {
     main_menu
   else
     NEW_SERVER_NAME=$user_input
+    server_list_names[$number_of_stored_servers]=$user_input
     add_new_server_address
   fi
 }
@@ -236,6 +241,7 @@ add_new_server_address () {
     main_menu
   else
     NEW_SERVER_ADDRESS=$user_input
+    server_list_addrs[$number_of_stored_servers]=$user_input
     add_new_server_user_name
   fi
 }
@@ -246,15 +252,43 @@ add_new_server_user_name () {
     main_menu
   else
     NEW_SERVER_USER_NAME=$user_input
+    server_list_usrnm[$number_of_stored_servers]=$user_input
     add_new_server_to_profile
   fi
 }
 
 add_new_server_to_profile () {
   echo 'Adding new server to the user profile.'
+  number_of_stored_servers=$((number_of_stored_servers+1))
   printf '%s;%s;%s\n' "$NEW_SERVER_NAME" \
   "$NEW_SERVER_ADDRESS" "$NEW_SERVER_USER_NAME" >> $profile_file_name
   main_menu
+}
+
+remove_servers () {
+  read -p 'Enter the ID# for server to delete, or (R)eturn: ' user_input
+  if [[ $user_input == 'r' || $user_input == 'R' ]]; then
+    main_menu
+  elif [[ !( $user_input =~ ^[0-9]+$ ) ||  $user_input > $number_of_stored_servers  ||  $user_input < 1 ]]; then
+    echo 'Server you selected does not exist, try again.'
+    remove_servers
+  else
+    REMOVE_SERVER_ID=$user_input
+
+    # removing server from file
+    # SED_ARGUMENT=$(printf '%dd' "$user_input")
+    # echo $SED_ARGUMENT
+    sed -i.bak "${user_input}d" $profile_file_name
+
+    # removing server from the array
+    for (( i = $REMOVE_SERVER_ID ; i < $number_of_stored_servers ; i++ )); do
+      server_list_names[$((i-1))]=${server_list_names[i]}
+      server_list_addrs[$((i-1))]=${server_list_addrs[i]}
+      server_list_usrnm[$((i-1))]=${server_list_usrnm[i]}
+    done
+    number_of_stored_servers=$((number_of_stored_servers-1))
+    main_menu
+  fi
 }
 
 ########################################################################
