@@ -276,8 +276,6 @@ remove_servers () {
     REMOVE_SERVER_ID=$user_input
 
     # removing server from file
-    # SED_ARGUMENT=$(printf '%dd' "$user_input")
-    # echo $SED_ARGUMENT
     sed -i.bak "${user_input}d" $profile_file_name
 
     # removing server from the array
